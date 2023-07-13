@@ -116,9 +116,9 @@ class Discriminator(nn.Module):
 
         return pred
 
-
-from torchsummary import summary
-Generator = Generator(100, (1 ,28, 28)).cuda()
-Discriminator = Discriminator((1, 28, 28)).cuda()
-summary(Generator, (100, ))
-summary(Discriminator, (784, ))
+# test model input and output
+# from torchsummary import summary
+# Generator = Generator(100, (1 ,28, 28)).cuda()
+# Discriminator = Discriminator((1, 28, 28)).cuda()
+# summary(Generator, (100, ))
+# summary(Discriminator, (784, ))
