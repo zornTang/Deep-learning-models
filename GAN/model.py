@@ -16,7 +16,7 @@ class Generator(nn.Module):
             input_dim (int): The dimension of the input noise vector.
             output_shape (tuple): The shape of the generator output.
                                   It represents the shape of the generated image.
-                                  Example: (batch_size, 3, 64, 64) for RGB images of size 64x64 number of batch_size.
+                                  Example: (3, 64, 64) for RGB images of size 64x64.
         """
         super(Generator, self).__init__()
         self.output_shape = output_shape
@@ -47,7 +47,7 @@ class Generator(nn.Module):
             *block(128, 256),
             *block(256, 512),
             *block(512, 1024),
-            nn.Linear(1024, np.prod(self.output_shape)),  # Output layer
+            nn.Linear(1024, int(np.prod(self.output_shape))),  # Output layer
             nn.Tanh()  # To map output values between -1 and 1
         )
 
@@ -77,7 +77,7 @@ class Discriminator(nn.Module):
         Args:
             image_shape (tuple): The shape of the discriminator input.
                                  It represents the shape of the image.
-                                 Example: (batch_size, 3, 64, 64) for RGB images of size 64x64 number of batch_size
+                                 Example: (3, 64, 64) for RGB images of size 64x64.
         """
         super(Discriminator, self).__init__()
 
@@ -85,7 +85,7 @@ class Discriminator(nn.Module):
 
         # Discriminator model architecture
         self.block1 = nn.Sequential(
-            nn.Linear(np.prod(self.image_shape), 512),
+            nn.Linear(int(np.prod(self.image_shape)), 512),
             nn.LeakyReLU(0.2, inplace=True)
         )
         self.block2 = nn.Sequential(
