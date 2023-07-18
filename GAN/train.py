@@ -1,7 +1,14 @@
+# -*- coding: utf-8 -*-
+#@Time    : 2023/07/18 22:26:29
+#@Author  : Tang
+#@File    : train.py
+#@Software: VScode
+
+
 import os
 import torch
 import argparse
-from tensorboardX import SummaryWriter
+import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
 from model import Generator, Discriminator
 from torch.utils.data import DataLoader
@@ -16,19 +23,17 @@ class GANTrainer:
         # Store the command-line arguments
         self.args = args
 
-        # Initialize a SummaryWriter for TensorBoard visualization
-        self.writer = SummaryWriter(logdir=self.args.log_dir)
-
-        # 设置保存模型的路径
-        self.best_generator_path = os.path.join(self.args.save_dir, 'best_generator.pth')
-
-        # 初始化变量以追踪最佳生成器的损失
-        self.best_loss = float('inf')
-
         # Initialize the generator, discriminator, and dataloader
         self.generator = None
         self.discriminator = None
         self.dataloader = None
+
+        # Initialize variable to track the number of epochs since the last model save
+        self.save_counter = 0
+
+        # Initialize lists to store losses for visualization
+        self.losses_g = []
+        self.losses_d = []
 
     def preprocess_data(self):
         """
@@ -105,32 +110,45 @@ class GANTrainer:
                 loss_d.backward()
                 optimizer_D.step()
 
-            # Check if the current loss is better than the best loss
-            if loss_g.item() < self.best_loss:
-                self.best_loss = loss_g.item()
-
-                # Save the generator model
-                torch.save(self.generator.state_dict(), self.best_generator_path)
+            # Store losses for visualization
+            self.losses_g.append(loss_g.item())
+            self.losses_d.append(loss_d.item())
 
             # Generate fake images for visualization
             with torch.no_grad():
-                z = torch.randn(10, self.args.input_dim).to(self.device)
+                z = torch.randn(64, self.args.input_dim).to(self.device)
                 fake_data = self.generator(z)
 
             # Visualize the losses and generated images
-            self.visualize(epoch, loss_g.item(), loss_d.item(), fake_data)
+            self.visualize(epoch, fake_data)
 
             # Print the current epoch's loss
             print('Epoch [{}/{}], Loss_G: {:.4f}, Loss_D: {:.4f}'.format(epoch + 1, self.args.epochs, loss_g.item(),
                                                                          loss_d.item()))
 
-    def visualize(self, epoch, loss_g, loss_d, fake_data):
+            # Check if it's time to save the model
+            if self.save_counter == self.args.save_interval:
+                self.save_counter = 0
+                save_path = os.path.join(self.args.save_dir, f'generator_epoch_{epoch + 1}.pth')
+                torch.save(self.generator.state_dict(), save_path)
+            else:
+                self.save_counter += 1
+
+    def visualize(self, epoch, fake_data):
         """
-        Log losses and generated images for visualization.
+        Visualize the losses and generated images.
         """
-        # Log the losses to TensorBoard
-        self.writer.add_scalar('Loss/Generator', loss_g, epoch)
-        self.writer.add_scalar('Loss/Discriminator', loss_d, epoch)
+        # Plot the losses
+        plt.figure()
+        plt.plot(range(epoch + 1), self.losses_g, label='Generator Loss')
+        plt.plot(range(epoch + 1), self.losses_d, label='Discriminator Loss')
+        plt.legend()
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('GAN Training Loss')
+        plt.grid(True)
+        plt.savefig('loss_plot.png')
+        plt.close()
 
         # Rescale the generated images to the range [0, 1]
         fake_data = (fake_data + 1) / 2
@@ -138,8 +156,16 @@ class GANTrainer:
         # Create a grid of generated images
         grid = make_grid(fake_data, nrow=8, normalize=True)
 
-        # Add the grid of generated images to TensorBoard
-        self.writer.add_image('Generated Images', grid, epoch)
+        # Convert the grid tensor to a NumPy array
+        grid_np = grid.permute(1, 2, 0).cpu().numpy()
+
+        # Plot the grid of generated images
+        plt.figure(figsize=(8, 8))
+        plt.imshow(grid_np)
+        plt.axis('off')
+        plt.title('Generated Images')
+        plt.savefig('generated_images.png')
+        plt.close()
 
     def run(self):
         """
@@ -154,9 +180,6 @@ class GANTrainer:
         # Start the training loop
         self.train()
 
-        # Close the SummaryWriter after training
-        self.writer.close()
-
 
 def parse_arguments():
     """
@@ -168,14 +191,14 @@ def parse_arguments():
     # Add the desired command-line arguments
     parser.add_argument("--dataset_root", type=str, default='./data', help='dataset path')
     parser.add_argument("--batch_size", type=int, default=64, help='size of batches')
-    parser.add_argument("--epochs", type=int, default=100, help='number of model training')
+    parser.add_argument("--epochs", type=int, default=10, help='number of model training')
     parser.add_argument("--lr", type=float, default=0.0002, help='learning rate')
     parser.add_argument("--image_channle", type=int, default=1, help='number of image channels')
     parser.add_argument("--image_width", type=int, default=28, help='width size of image')
     parser.add_argument("--image_height", type=int, default=28, help='height size of image')
     parser.add_argument("--input_dim", type=int, default=100, help='dimensionality of the input random noise')
-    parser.add_argument("--log_dir", type=str, default='./log', help="directory of log save")
-    parser.add_argument("--save_dir", type=str, default='./model', help='directory of save best model')
+    parser.add_argument("--save_dir", type=str, default='./model', help='directory to save the model')
+    parser.add_argument("--save_interval", type=int, default=10, help='interval for saving the model')
 
     # Parse the arguments and return the object
     return parser.parse_args()

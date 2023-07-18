@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2023/7/12 22:01
-# @Author  : Tang
-# @File    : model.py
-# @Software: PyCharm
+#@Time    : 2023/07/18 22:26:12
+#@Author  : Tang
+#@File    : model.py
+#@Software: VScode
+
+
 import numpy as np
 import torch.nn as nn
 
