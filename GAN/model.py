@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
-#@Time    : 2023/07/18 22:26:12
-#@Author  : Tang
-#@File    : model.py
-#@Software: VScode
+# -*- encoding: utf-8 -*-
+#@Time    :   2023/07/24 15:55:57
+#@Author  :   Tang
+#@File    :   model.py
+#@Software:   Vscode
+
+
 import numpy as np
 import torch.nn as nn
 

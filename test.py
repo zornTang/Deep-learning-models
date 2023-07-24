@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
-#@Time    : 2023/07/18 22:25:55
-#@Author  : Tang
-#@File    : test.py
-#@Software: VScode
+# -*- encoding: utf-8 -*-
+#@Time    :   2023/07/24 15:56:06
+#@Author  :   Tang
+#@File    :   test.py
+#@Software:   Vscode
+
+
 import torch
 import torch.nn as nn
 import torchsummary as summary
