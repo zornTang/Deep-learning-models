@@ -3,9 +3,6 @@
 #@Author  : Tang
 #@File    : test.py
 #@Software: VScode
-
-
-# 导入需要的包
 import torch
 import torch.nn as nn
 import torchsummary as summary
