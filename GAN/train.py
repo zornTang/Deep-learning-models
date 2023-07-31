@@ -2,9 +2,7 @@
 #@Time    :   2023/07/24 15:55:36
 #@Author  :   Tang
 #@File    :   train.py
-#@Software:   Vscode
-
-
+#@Software:   Pycharm
 import os
 import torch
 import argparse
