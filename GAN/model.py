@@ -2,7 +2,7 @@
 #@Time    :   2023/07/24 15:55:57
 #@Author  :   Tang
 #@File    :   model.py
-#@Software:   Vscode
+#@Software:   Pycharm
 
 
 import numpy as np
