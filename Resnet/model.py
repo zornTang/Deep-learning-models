@@ -3,3 +3,4 @@
 # @Author  : Tang
 # @File    : model.py
 # @Software: PyCharm
+import torch.nn as nn
